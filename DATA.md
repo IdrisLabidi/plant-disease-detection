@@ -46,8 +46,8 @@ Verify the current link, license and class list for each source before downloadi
 
 | Dataset | Type | Used for | Link | License | Downloaded | Notes |
 |---|---|---|---|---|---|---|
-| PlantVillage | Lab-style, plain backgrounds | Main training data, baseline | _TBD_ | _TBD_ | no | Some copies contain pre-augmented duplicates |
-| PlantDoc | Field images, has bounding boxes | Field fine-tuning and testing | _TBD_ | _TBD_ | no | Small, labels may be noisy |
+| PlantVillage | Lab-style, plain backgrounds | Main training data, baseline |[link](https://huggingface.co/datasets/geraldmc/plantvillage-full)|CC0 1.0| no | Some copies contain pre-augmented duplicates |
+| PlantDoc | Field images, has bounding boxes | Field fine-tuning and testing |[link](https://huggingface.co/datasets/geraldmc/plantdoc-full)| CC BY 4.0| no | Small, labels may be noisy |
 | PlantWild | Field images | Extra real-world data, robustness | _TBD_ | _TBD_ | no | |
 | Cassava Leaf Disease | Field images | Out-of-domain test | _TBD_ | _TBD_ | no | Only relevant if cassava is selected |
 | _other_ | | | | | | |
