@@ -2,41 +2,39 @@ Data Contract
 
 This file is the single source of truth for how data is stored, formatted, cleaned and split in this project. If you change anything here, do it in a pull request and tell the team.
 
-> **Status:** draft. Crop and class selection is **not decided yet** (see section 1).
-
 ---
 
 ## 1. Scope: crops and classes
 
 **Selected crops:** tomato, apple, corn (maize)
 
-**Why these three:** all three exist in both PlantVillage (lab images) and PlantDoc (field images), so we can measure the lab-to-field gap. Together they give 18 classes: a manageable number for error analysis and for writing reviewed treatment advice, with a mix of fungal, bacterial, viral and pest problems. Decision date: _fill in_.
+**Why these three:** all three exist in PlantVillage (lab images) and in both field datasets we use, PlantDoc and PlantWild, so we can measure the lab-to-field gap. Together they give 18 classes: a manageable number for error analysis and for writing reviewed treatment advice, with a mix of fungal, bacterial, viral and pest problems. Decision date: _fill in_.
 
-**Class list** (copy of `configs/classes.yaml`; the yaml file is the source of truth). Counts come from the EDA of `geraldmc/plantvillage-full` and `geraldmc/plantdoc-full` (selected crops only):
+**Class list** (copy of `configs/classes.yaml`, the yaml file is the source of truth). Image counts per source, selected crops only; PlantWild counts are filled in after the folder count:
 
-| ID | Crop | Class name (folder name) | PlantVillage label | PV images | PlantDoc label | PlantDoc images | Notes |
-|---|---|---|---|---|---|---|---|
-| 0 | apple | apple__apple_scab | Apple___Apple_scab | 630 | Apple Scab Leaf | 93 |  |
-| 1 | apple | apple__black_rot | Apple___Black_rot | 621 | - | 0 | No field images |
-| 2 | apple | apple__cedar_apple_rust | Apple___Cedar_apple_rust | 275 | Apple rust leaf | 89 | Smallest PlantVillage class (275) |
-| 3 | apple | apple__healthy | Apple___healthy | 1,645 | Apple leaf | 91 | PlantDoc 'Apple leaf' assumed healthy |
-| 4 | corn | corn__gray_leaf_spot | Corn_(maize)___Cercospora_leaf_spot Gray_leaf_spot | 513 | Corn Gray leaf spot | 68 |  |
-| 5 | corn | corn__common_rust | Corn_(maize)___Common_rust_ | 1,192 | Corn rust leaf | 116 |  |
-| 6 | corn | corn__northern_leaf_blight | Corn_(maize)___Northern_Leaf_Blight | 985 | Corn leaf blight | 192 | PlantDoc 'Corn leaf blight' assumed northern leaf blight |
-| 7 | corn | corn__healthy | Corn_(maize)___healthy | 1,162 | - | 0 | No field images |
-| 8 | tomato | tomato__bacterial_spot | Tomato___Bacterial_spot | 2,127 | Tomato leaf bacterial spot | 110 |  |
-| 9 | tomato | tomato__early_blight | Tomato___Early_blight | 1,000 | Tomato Early blight leaf | 88 |  |
-| 10 | tomato | tomato__late_blight | Tomato___Late_blight | 1,909 | Tomato leaf late blight | 111 |  |
-| 11 | tomato | tomato__leaf_mold | Tomato___Leaf_Mold | 952 | Tomato mold leaf | 91 |  |
-| 12 | tomato | tomato__septoria_leaf_spot | Tomato___Septoria_leaf_spot | 1,771 | Tomato Septoria leaf spot | 151 |  |
-| 13 | tomato | tomato__spider_mites | Tomato___Spider_mites Two-spotted_spider_mite | 1,676 | Tomato two spotted spider mites leaf | 2 | Only 2 field images: not usable for field evaluation |
-| 14 | tomato | tomato__target_spot | Tomato___Target_Spot | 1,404 | - | 0 | Dataset card mentions a known issue; check before use. No field images. |
-| 15 | tomato | tomato__yellow_leaf_curl_virus | Tomato___Tomato_Yellow_Leaf_Curl_Virus | 5,357 | Tomato leaf yellow virus | 76 | Largest class (5,357): watch imbalance |
-| 16 | tomato | tomato__mosaic_virus | Tomato___Tomato_mosaic_virus | 373 | Tomato leaf mosaic virus | 54 | Small class (373); only 54 field images |
-| 17 | tomato | tomato__healthy | Tomato___healthy | 1,591 | Tomato leaf | 63 | PlantDoc 'Tomato leaf' assumed healthy |
-| | | **Total** | | **25,183** | | **1,395** | 18 classes in PlantVillage, 15 in PlantDoc |
+| ID | Class name (folder name) | PlantVillage (lab) | PlantDoc (field) | PlantWild v2 (field) | Notes |
+|---|---|---|---|---|---|
+| 0 | apple__apple_scab | 630 | 93 | 258 |  |
+| 1 | apple__black_rot | 621 | 0 | 83 | Field images only from PlantWild |
+| 2 | apple__cedar_apple_rust | 275 | 89 | 139 | Smallest PlantVillage class (275). PlantWild 'apple rust' assumed cedar apple rust |
+| 3 | apple__healthy | 1,645 | 91 | 0 | Field images only from PlantDoc ('Apple leaf', assumed healthy) |
+| 4 | corn__gray_leaf_spot | 513 | 68 | 107 |  |
+| 5 | corn__common_rust | 1,192 | 116 | 177 | PlantWild 'corn rust' assumed common rust |
+| 6 | corn__northern_leaf_blight | 985 | 192 | 130 | PlantDoc 'Corn leaf blight' assumed northern leaf blight |
+| 7 | corn__healthy | 1,162 | 0 | 0 | No field images (check PlantWild v1 'corn leaf') |
+| 8 | tomato__bacterial_spot | 2,127 | 110 | 110 |  |
+| 9 | tomato__early_blight | 1,000 | 88 | 187 |  |
+| 10 | tomato__late_blight | 1,909 | 111 | 163 |  |
+| 11 | tomato__leaf_mold | 952 | 91 | 156 |  |
+| 12 | tomato__septoria_leaf_spot | 1,771 | 151 | 130 |  |
+| 13 | tomato__spider_mites | 1,676 | 2 | 0 | Only 2 PlantDoc images: not usable for field evaluation |
+| 14 | tomato__target_spot | 1,404 | 0 | 0 | No field images. PlantVillage card mentions a known issue with this class. |
+| 15 | tomato__yellow_leaf_curl_virus | 5,357 | 76 | 93 | Largest class (5,357): watch imbalance |
+| 16 | tomato__mosaic_virus | 373 | 54 | 63 | Small PlantVillage class (373) |
+| 17 | tomato__healthy | 1,591 | 63 | 0 | Field images only from PlantDoc ('Tomato leaf', assumed healthy) |
+| | **Total** | **25,183** | **1,395** | 1640 | |
 
-Label mappings: `configs/mappings/plantvillage.yaml` and `configs/mappings/plantdoc.yaml`.
+The source label strings for every class are in `configs/mappings/plantvillage.yaml`, `plantdoc.yaml` and `plantwild.yaml`.
 
 Rules:
 
@@ -47,10 +45,12 @@ Rules:
 
 Known data issues to handle:
 
-- **Crop imbalance:** tomato has 18,160 of 25,183 PlantVillage images (72%), corn 3,852 (15%), apple 3,171 (13%). Within classes the ratio between the largest (5,357) and smallest (275) is about 19 to 1. Report macro F1 and per-crop results, and use class weights or sampling.
-- **Field coverage:** 15 of 18 classes have PlantDoc images. `apple__black_rot`, `corn__healthy` and `tomato__target_spot` have none, and `tomato__spider_mites` has only 2, so field evaluation covers 14 classes with a usable number of images. Report this coverage explicitly.
-- **Small field set:** PlantDoc has only 1,395 images for these crops (54 to 192 per class), so split it carefully (see section 6) and expect noisy results.
-- **Assumed PlantDoc labels:** "Apple leaf", "Tomato leaf" and "Corn leaf blight" are mapped by assumption. Check sample images before trusting them.
+- **Crop imbalance:** tomato has 18,160 of 25,183 PlantVillage images (72%), corn 3,852 (15%), apple 3,171 (13%). The largest class (5,357) is about 19 times the smallest (275). Report macro F1 and per-crop results, and use class weights or sampling.
+- **Field coverage (PlantDoc + PlantWild v2):** 15 of 18 classes have usable field images. `corn__healthy` and `tomato__target_spot` have none, and `tomato__spider_mites` has only 2 (PlantDoc). Healthy field images exist only for apple and tomato, from PlantDoc, with assumed labels. Report this coverage explicitly.
+- **PlantWild v2 has no healthy classes and no split metadata.** We create our own split (section 6). Check PlantWild v1 (`<plant> leaf` folders) for healthy images.
+- **Possible overlap between field datasets:** PlantDoc and PlantWild are both web-collected. Run a cross-dataset near-duplicate check before building any field split.
+- **Assumed labels:** PlantDoc "Apple leaf", "Tomato leaf", "Corn leaf blight" and PlantWild "apple rust", "corn rust" are mapped by assumption. Check sample images before trusting them.
+- **PlantWild license:** CC BY-NC-ND 4.0. Keep the images private (no public Hugging Face, Roboflow or data-remote copies) and share only scripts and split files.
 - **Tomato target spot:** the PlantVillage dataset card mentions a known issue with this class.
 
 ---
