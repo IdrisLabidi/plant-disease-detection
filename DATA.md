@@ -8,35 +8,50 @@ This file is the single source of truth for how data is stored, formatted, clean
 
 ## 1. Scope: crops and classes
 
-**Selected crops:** _TBD_
+**Selected crops:** tomato, apple, corn (maize)
 
-**Class list:** _TBD_ (the final list lives in `configs/classes.yaml`; this table is a readable copy)
+**Why these three:** all three exist in both PlantVillage (lab images) and PlantDoc (field images), so we can measure the lab-to-field gap. Together they give 18 classes: a manageable number for error analysis and for writing reviewed treatment advice, with a mix of fungal, bacterial, viral and pest problems. Decision date: _fill in_.
 
-| ID | Crop | Condition | Class name (folder name) | Notes |
-|---|---|---|---|---|
-| 0 | | | | |
-| 1 | | | | |
-| 2 | | | | |
+**Class list** (copy of `configs/classes.yaml`; the yaml file is the source of truth). Counts come from the EDA of `geraldmc/plantvillage-full` and `geraldmc/plantdoc-full` (selected crops only):
+
+| ID | Crop | Class name (folder name) | PlantVillage label | PV images | PlantDoc label | PlantDoc images | Notes |
+|---|---|---|---|---|---|---|---|
+| 0 | apple | apple__apple_scab | Apple___Apple_scab | 630 | Apple Scab Leaf | 93 |  |
+| 1 | apple | apple__black_rot | Apple___Black_rot | 621 | - | 0 | No field images |
+| 2 | apple | apple__cedar_apple_rust | Apple___Cedar_apple_rust | 275 | Apple rust leaf | 89 | Smallest PlantVillage class (275) |
+| 3 | apple | apple__healthy | Apple___healthy | 1,645 | Apple leaf | 91 | PlantDoc 'Apple leaf' assumed healthy |
+| 4 | corn | corn__gray_leaf_spot | Corn_(maize)___Cercospora_leaf_spot Gray_leaf_spot | 513 | Corn Gray leaf spot | 68 |  |
+| 5 | corn | corn__common_rust | Corn_(maize)___Common_rust_ | 1,192 | Corn rust leaf | 116 |  |
+| 6 | corn | corn__northern_leaf_blight | Corn_(maize)___Northern_Leaf_Blight | 985 | Corn leaf blight | 192 | PlantDoc 'Corn leaf blight' assumed northern leaf blight |
+| 7 | corn | corn__healthy | Corn_(maize)___healthy | 1,162 | - | 0 | No field images |
+| 8 | tomato | tomato__bacterial_spot | Tomato___Bacterial_spot | 2,127 | Tomato leaf bacterial spot | 110 |  |
+| 9 | tomato | tomato__early_blight | Tomato___Early_blight | 1,000 | Tomato Early blight leaf | 88 |  |
+| 10 | tomato | tomato__late_blight | Tomato___Late_blight | 1,909 | Tomato leaf late blight | 111 |  |
+| 11 | tomato | tomato__leaf_mold | Tomato___Leaf_Mold | 952 | Tomato mold leaf | 91 |  |
+| 12 | tomato | tomato__septoria_leaf_spot | Tomato___Septoria_leaf_spot | 1,771 | Tomato Septoria leaf spot | 151 |  |
+| 13 | tomato | tomato__spider_mites | Tomato___Spider_mites Two-spotted_spider_mite | 1,676 | Tomato two spotted spider mites leaf | 2 | Only 2 field images: not usable for field evaluation |
+| 14 | tomato | tomato__target_spot | Tomato___Target_Spot | 1,404 | - | 0 | Dataset card mentions a known issue; check before use. No field images. |
+| 15 | tomato | tomato__yellow_leaf_curl_virus | Tomato___Tomato_Yellow_Leaf_Curl_Virus | 5,357 | Tomato leaf yellow virus | 76 | Largest class (5,357): watch imbalance |
+| 16 | tomato | tomato__mosaic_virus | Tomato___Tomato_mosaic_virus | 373 | Tomato leaf mosaic virus | 54 | Small class (373); only 54 field images |
+| 17 | tomato | tomato__healthy | Tomato___healthy | 1,591 | Tomato leaf | 63 | PlantDoc 'Tomato leaf' assumed healthy |
+| | | **Total** | | **25,183** | | **1,395** | 18 classes in PlantVillage, 15 in PlantDoc |
+
+Label mappings: `configs/mappings/plantvillage.yaml` and `configs/mappings/plantdoc.yaml`.
 
 Rules:
 
-- Class names are lowercase, use underscores, and follow `crop__condition`, e.g. `cropname__diseasename` and `cropname__healthy`. Two underscores separate crop from condition.
-- Every crop includes a `healthy` class.
+- Class names are lowercase, use underscores, and follow `crop__condition`. Two underscores separate crop from condition.
+- Every crop has a `healthy` class.
 - The order of classes in `configs/classes.yaml` defines the numeric IDs. Never reorder them after training starts.
 - All code reads the class list from `configs/classes.yaml`. **Do not hard-code class names.**
 
-Example `configs/classes.yaml` (to fill in once the choice is made):
+Known data issues to handle:
 
-```yaml
-crops: []        # e.g. [cropA, cropB, cropC]
-classes: []      # e.g. [cropA__healthy, cropA__diseaseX, ...]
-```
-
-Selection criteria to decide with the team:
-
-- Crops present in **both** a lab-style dataset and at least one field dataset, so we can measure the lab-to-field gap.
-- Enough images per class (see section 3).
-- We can write reliable treatment advice for each disease.
+- **Crop imbalance:** tomato has 18,160 of 25,183 PlantVillage images (72%), corn 3,852 (15%), apple 3,171 (13%). Within classes the ratio between the largest (5,357) and smallest (275) is about 19 to 1. Report macro F1 and per-crop results, and use class weights or sampling.
+- **Field coverage:** 15 of 18 classes have PlantDoc images. `apple__black_rot`, `corn__healthy` and `tomato__target_spot` have none, and `tomato__spider_mites` has only 2, so field evaluation covers 14 classes with a usable number of images. Report this coverage explicitly.
+- **Small field set:** PlantDoc has only 1,395 images for these crops (54 to 192 per class), so split it carefully (see section 6) and expect noisy results.
+- **Assumed PlantDoc labels:** "Apple leaf", "Tomato leaf" and "Corn leaf blight" are mapped by assumption. Check sample images before trusting them.
+- **Tomato target spot:** the PlantVillage dataset card mentions a known issue with this class.
 
 ---
 
@@ -48,7 +63,7 @@ Verify the current link, license and class list for each source before downloadi
 |---|---|---|---|---|---|---|
 | PlantVillage | Lab-style, plain backgrounds | Main training data, baseline |[link](https://huggingface.co/datasets/geraldmc/plantvillage-full)|CC0 1.0| no | Some copies contain pre-augmented duplicates |
 | PlantDoc | Field images, has bounding boxes | Field fine-tuning and testing |[link](https://huggingface.co/datasets/geraldmc/plantdoc-full)| CC BY 4.0| no | Small, labels may be noisy |
-| PlantWild | Field images | Extra real-world data, robustness | _TBD_ | _TBD_ | no | |
+| PlantWild | Field images | Extra real-world data, robustness | [link](https://tqwei05.github.io/PlantWild/) | [Creative Commons BY-NC-ND 4.0 license.](https://creativecommons.org/licenses/by-nc-nd/4.0/) | yes | |
 | Cassava Leaf Disease | Field images | Out-of-domain test | _TBD_ | _TBD_ | no | Only relevant if cassava is selected |
 | _other_ | | | | | | |
 

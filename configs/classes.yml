@@ -1,0 +1,34 @@
+# configs/classes.yaml  -  single source of truth for crops and classes.
+# Class IDs are the position in this list. NEVER reorder or insert in the middle
+# once training has started; only append.
+#
+# Source labels in the comments are the PlantVillage names, verified against
+# geraldmc/plantvillage-full. The full mappings are in configs/mappings/.
+
+crops:
+  - tomato
+  - apple
+  - corn
+
+classes:
+  # --- apple (IDs 0-3) ---
+  - apple__apple_scab               # Apple___Apple_scab
+  - apple__black_rot                # Apple___Black_rot
+  - apple__cedar_apple_rust         # Apple___Cedar_apple_rust
+  - apple__healthy                  # Apple___healthy
+  # --- corn (IDs 4-7) ---
+  - corn__gray_leaf_spot            # Corn_(maize)___Cercospora_leaf_spot Gray_leaf_spot
+  - corn__common_rust               # Corn_(maize)___Common_rust_
+  - corn__northern_leaf_blight      # Corn_(maize)___Northern_Leaf_Blight
+  - corn__healthy                   # Corn_(maize)___healthy
+  # --- tomato (IDs 8-17) ---
+  - tomato__bacterial_spot          # Tomato___Bacterial_spot
+  - tomato__early_blight            # Tomato___Early_blight
+  - tomato__late_blight             # Tomato___Late_blight
+  - tomato__leaf_mold               # Tomato___Leaf_Mold
+  - tomato__septoria_leaf_spot      # Tomato___Septoria_leaf_spot
+  - tomato__spider_mites            # Tomato___Spider_mites Two-spotted_spider_mite
+  - tomato__target_spot             # Tomato___Target_Spot   (check dataset card note; no PlantDoc images)
+  - tomato__yellow_leaf_curl_virus  # Tomato___Tomato_Yellow_Leaf_Curl_Virus
+  - tomato__mosaic_virus            # Tomato___Tomato_mosaic_virus
+  - tomato__healthy                 # Tomato___healthy

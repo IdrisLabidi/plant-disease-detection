@@ -1,0 +1,30 @@
+# configs/mappings/plantdoc.yaml
+# Maps PlantDoc labels (column "class_label") to our class names.
+# Source labels are verified against geraldmc/plantdoc-full.
+# ASSUMPTIONS marked below must be checked by looking at sample images
+# (PlantDoc names are less precise than PlantVillage names).
+dataset: plantdoc
+source: geraldmc/plantdoc-full
+label_column: class_label
+mapping:
+  "Apple Scab Leaf": apple__apple_scab
+  "Apple rust leaf": apple__cedar_apple_rust
+  "Apple leaf": apple__healthy                      
+  "Corn Gray leaf spot": corn__gray_leaf_spot
+  "Corn rust leaf": corn__common_rust
+  "Corn leaf blight": corn__northern_leaf_blight     # ASSUMPTION: blight = northern leaf blight
+  "Tomato Early blight leaf": tomato__early_blight
+  "Tomato Septoria leaf spot": tomato__septoria_leaf_spot
+  "Tomato leaf bacterial spot": tomato__bacterial_spot
+  "Tomato leaf late blight": tomato__late_blight
+  "Tomato leaf yellow virus": tomato__yellow_leaf_curl_virus
+  "Tomato leaf mosaic virus": tomato__mosaic_virus
+  "Tomato mold leaf": tomato__leaf_mold
+  "Tomato leaf": tomato__healthy                   
+  "Tomato two spotted spider mites leaf": tomato__spider_mites   # only 2 images: too few to evaluate
+# Our classes with NO PlantDoc images (no field evaluation possible):
+not_in_dataset:
+  - apple__black_rot
+  - corn__healthy
+  - tomato__target_spot
+excluded: "all labels of crops other than tomato, apple and corn"

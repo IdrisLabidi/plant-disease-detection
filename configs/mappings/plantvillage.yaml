@@ -1,0 +1,27 @@
+# configs/mappings/plantvillage.yaml
+# Maps source labels (column "class_label") to our class names in configs/classes.yaml.
+# Source labels are verified against geraldmc/plantvillage-full.
+# Any source label not listed here (all other crops) is EXCLUDED, never guessed.
+dataset: plantvillage
+source: geraldmc/plantvillage-full
+label_column: class_label
+mapping:
+  "Apple___Apple_scab": apple__apple_scab
+  "Apple___Black_rot": apple__black_rot
+  "Apple___Cedar_apple_rust": apple__cedar_apple_rust
+  "Apple___healthy": apple__healthy
+  "Corn_(maize)___Cercospora_leaf_spot Gray_leaf_spot": corn__gray_leaf_spot
+  "Corn_(maize)___Common_rust_": corn__common_rust
+  "Corn_(maize)___Northern_Leaf_Blight": corn__northern_leaf_blight
+  "Corn_(maize)___healthy": corn__healthy
+  "Tomato___Bacterial_spot": tomato__bacterial_spot
+  "Tomato___Early_blight": tomato__early_blight
+  "Tomato___Late_blight": tomato__late_blight
+  "Tomato___Leaf_Mold": tomato__leaf_mold
+  "Tomato___Septoria_leaf_spot": tomato__septoria_leaf_spot
+  "Tomato___Spider_mites Two-spotted_spider_mite": tomato__spider_mites
+  "Tomato___Target_Spot": tomato__target_spot
+  "Tomato___Tomato_Yellow_Leaf_Curl_Virus": tomato__yellow_leaf_curl_virus
+  "Tomato___Tomato_mosaic_virus": tomato__mosaic_virus
+  "Tomato___healthy": tomato__healthy
+excluded: "all labels of crops other than tomato, apple and corn"
