@@ -64,7 +64,7 @@ Verify the current link, license and class list for each source before downloadi
 | PlantVillage | Lab-style, plain backgrounds | Main training data, baseline |[link](https://huggingface.co/datasets/geraldmc/plantvillage-full)|CC0 1.0| no | Some copies contain pre-augmented duplicates |
 | PlantDoc | Field images, has bounding boxes | Field fine-tuning and testing |[link](https://huggingface.co/datasets/geraldmc/plantdoc-full)| CC BY 4.0| no | Small, labels may be noisy |
 | PlantWild | Field images | Extra real-world data, robustness | [link](https://tqwei05.github.io/PlantWild/) | [Creative Commons BY-NC-ND 4.0 license.](https://creativecommons.org/licenses/by-nc-nd/4.0/) | yes | |
-| Cassava Leaf Disease | Field images | Out-of-domain test | _TBD_ | _TBD_ | no | Only relevant if cassava is selected |
+|Plantseg| Disease Segmentation |Object detection training| [link](https://github.com/tqwei05/PlantSeg?utm_source=chatgpt.com) | ?? | no | |
 | _other_ | | | | | | |
 
 Rules:
