@@ -4,7 +4,7 @@ A web and mobile-friendly app where a user takes a photo of a plant leaf and rec
 
 The core of the project is **fine-tuning pretrained computer vision models** on public plant disease datasets, comparing architectures fairly, and deploying the best one in a lightweight app.
 
-> **Status:** project setup. Crops and classes are not chosen yet (see [`DATA.md`](DATA.md)).
+> **Status:** active development. The project configuration defines tomato, apple, and corn classes, while the PlantVillage classifier is trained across all dataset classes.
 
 ---
 
@@ -62,6 +62,7 @@ Key facts:
 | Backend | FastAPI, ONNX Runtime, SQLite or PostgreSQL |
 | Frontend | React PWA (Flutter / React Native if going native) |
 | Deployment | Docker, Hugging Face Spaces or Render |
+| Python environment | `uv`, Python 3.12 |
 
 ---
 
@@ -71,18 +72,25 @@ Key facts:
 .
 ├── README.md
 ├── DATA.md                 # data contract: classes, formats, splits (read this first)
-├── requirements.txt
+├── pyproject.toml          # project metadata and dependencies
+├── uv.lock                 # reproducible dependency lockfile
+├── .python-version         # local Python version (3.12)
 ├── configs/
 │   ├── classes.yaml        # selected crops and classes (single source of truth)
-│   └── train.yaml          # image size, seed, hyperparameters, paths
+│   └── mappings/           # source-dataset label mappings
 ├── data/                   # NOT in Git (use DVC / Kaggle / Hugging Face)
 │   ├── raw/                # immutable, never edited by hand
 │   ├── interim/            # after cleaning
 │   └── processed/          # final train / val / test
-├── src/
-│   ├── data/               # download, clean, dedup, split, augment
-│   ├── models/             # training, evaluation, export
-│   └── app/                # backend API and frontend
+├── models/
+│   └── model_cards.yaml    # preprocessing and serving contracts
+├── backend/
+│   └── app/
+│       ├── __init__.py
+│       └── main.py
+├── scripts/
+│   ├── infer_plantseg.py
+│   └── infer_plantvillage.py
 ├── notebooks/              # exploration only, not part of the pipeline
 ├── docs/                   # report material, knowledge-base sources
 └── tests/                  # data validation and pipeline tests
@@ -93,10 +101,28 @@ Key facts:
 ```bash
 git clone <repo-url>
 cd <repo-name>
-python -m venv .venv
-source .venv/bin/activate          # Windows: .venv\Scripts\activate
-pip install -r requirements.txt
+uv sync
 ```
+
+`uv sync` creates or updates the project virtual environment from `pyproject.toml` and `uv.lock`, using the Python version recorded in `.python-version`.
+
+Run project commands inside the managed environment with:
+
+```bash
+uv run python scripts/infer_plantvillage.py --help
+uv run python scripts/infer_plantseg.py --help
+uv run pytest
+```
+
+### Test FastAPI
+
+Start the development server through `uv`:
+
+```bash
+uv run fastapi dev backend/app/main.py
+```
+
+Open `http://127.0.0.1:8000/` for the hello-world response or `http://127.0.0.1:8000/docs` for interactive Swagger documentation.
 
 Then:
 

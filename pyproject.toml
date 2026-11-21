@@ -83,10 +83,3 @@ dependencies = [
     "xxhash==4.0.1",
     "yarl==1.25.1",
 ]
-
-[project.scripts]
-plant-disease-project = "plant_disease_project:main"
-
-[build-system]
-requires = ["uv_build>=0.12.1,<0.13.0"]
-build-backend = "uv_build"
