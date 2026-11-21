@@ -31,12 +31,23 @@ class Settings(BaseSettings):
     smtp_password: SecretStr | None = None
     smtp_from: str = "noreply@example.com"
     max_upload_mb: int = 8
+    google_client_ids: Annotated[list[str], NoDecode] = []
+    facebook_app_id: str = ""
+    facebook_app_secret: SecretStr | None = None
+    facebook_graph_version: str = "v22.0"
     issuer: str = "plant-disease-api"
     audience: str = "plant-disease-app"
 
     @field_validator("cors_origins", mode="before")
     @classmethod
     def split_origins(cls, value: str | list[str]) -> list[str]:
+        if isinstance(value, str):
+            return [item.strip() for item in value.split(",") if item.strip()]
+        return value
+
+    @field_validator("google_client_ids", mode="before")
+    @classmethod
+    def split_google_ids(cls, value: str | list[str]) -> list[str]:
         if isinstance(value, str):
             return [item.strip() for item in value.split(",") if item.strip()]
         return value

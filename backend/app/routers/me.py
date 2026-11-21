@@ -28,6 +28,16 @@ def update_me(
     return user
 
 
+@router.get("/identities")
+def get_identities(
+    user: User = Depends(current_user),
+) -> list[dict[str, str]]:
+    return [
+        {"provider": identity.provider, "email_at_link": identity.email_at_link or ""}
+        for identity in user.oauth_identities
+    ]
+
+
 @router.delete("", status_code=204)
 def delete_me(user: User = Depends(current_user), db: Session = Depends(get_db)) -> None:
     user.deleted_at = datetime.now(UTC)

@@ -42,6 +42,7 @@ class TokenResponse(BaseModel):
     token_type: str = "bearer"
     expires_in: int
     user: UserResponse
+    is_new_user: bool | None = None
 
 
 class RefreshRequest(BaseModel):
@@ -64,3 +65,12 @@ class PasswordChangeRequest(BaseModel):
 
 class MeUpdateRequest(BaseModel):
     display_name: str | None = Field(default=None, max_length=120)
+
+
+class GoogleLoginRequest(BaseModel):
+    id_token: str = Field(min_length=20)
+    nonce: str | None = None
+
+
+class FacebookLoginRequest(BaseModel):
+    access_token: str = Field(min_length=20)
