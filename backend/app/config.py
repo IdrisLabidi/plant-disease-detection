@@ -1,18 +1,28 @@
 from functools import lru_cache
+from pathlib import Path
+from typing import Annotated
 
 from pydantic import Field, SecretStr, field_validator
-from pydantic_settings import BaseSettings, SettingsConfigDict
+from pydantic_settings import BaseSettings, NoDecode, SettingsConfigDict
+
+BACKEND_DIR = Path(__file__).resolve().parents[1]
+PROJECT_DIR = BACKEND_DIR.parent
 
 
 class Settings(BaseSettings):
-    model_config = SettingsConfigDict(env_file=".env", env_prefix="", extra="ignore")
+    model_config = SettingsConfigDict(
+        env_file=(BACKEND_DIR / ".env", PROJECT_DIR / ".env"),
+        env_prefix="",
+        extra="ignore",
+        case_sensitive=False,
+    )
 
     env: str = "development"
     database_url: str = Field(..., alias="DATABASE_URL")
     secret_key: SecretStr = Field(..., alias="SECRET_KEY")
     access_token_minutes: int = 15
     refresh_token_days: int = 30
-    cors_origins: list[str] = []
+    cors_origins: Annotated[list[str], NoDecode] = []
     frontend_url: str = ""
     email_backend: str = "console"
     smtp_host: str = ""
