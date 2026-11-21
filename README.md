@@ -29,6 +29,19 @@ The core of the project is **fine-tuning pretrained computer vision models** on 
 
 All models start from pretrained weights and are fine-tuned in two stages (train the new head, then unfreeze the backbone with a low learning rate).
 
+### Model cards
+
+Before serving or app integration, use [models/model_cards.yaml](models/model_cards.yaml) as the model-preprocessing and output contract. It records the real resize rule, RGB scale, normalization, class order source, output activation, and threshold status for each exported model.
+
+Key facts:
+
+- Classifier exports return raw logits; apply softmax over the class dimension in serving.
+- Segmenter exports return two logits per pixel; apply softmax over the channel dimension and use channel 1 for the lesion probability.
+- The classifier and segmenter both resize by stretching to a fixed square; neither notebook performs a center crop.
+- Classifier class names are dynamically derived by sorting all unique PlantVillage `class_label` values. Read the exact order from `model_config.json` beside the export.
+- No classifier uncertainty threshold has been selected on a field validation set.
+- The segmenter threshold `0.5` is an initial serving default, not a validation-tuned value.
+
 | Model | Role |
 |---|---|
 | MobileNetV3 / EfficientNet-B0 | Mobile-friendly baseline, on-device candidate |
