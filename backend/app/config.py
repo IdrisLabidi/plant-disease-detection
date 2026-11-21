@@ -31,6 +31,8 @@ class Settings(BaseSettings):
     smtp_password: SecretStr | None = None
     smtp_from: str = "noreply@example.com"
     max_upload_mb: int = 8
+    models_dir: str = "models"
+    storage_dir: str = "storage"
     google_client_ids: Annotated[list[str], NoDecode] = []
     facebook_app_id: str = ""
     facebook_app_secret: SecretStr | None = None

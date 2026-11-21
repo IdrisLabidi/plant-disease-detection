@@ -1,5 +1,6 @@
 import uuid
 from datetime import datetime
+from typing import Any
 
 from pydantic import BaseModel, ConfigDict, EmailStr, Field, field_validator
 
@@ -74,3 +75,40 @@ class GoogleLoginRequest(BaseModel):
 
 class FacebookLoginRequest(BaseModel):
     access_token: str = Field(min_length=20)
+
+
+class TopPrediction(BaseModel):
+    class_name: str
+    probability: float = Field(ge=0, le=1)
+
+
+class ScanResponse(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: uuid.UUID
+    client_id: str | None
+    created_at: datetime
+    source: str
+    model_name: str
+    model_version: str
+    top_class: str
+    confidence: float
+    top3: list[TopPrediction] | list[Any]
+    unsure: bool
+    lesion_area_frac: float | None
+    mask_url: str | None = None
+    latency_ms: int | None
+    notes: str | None
+
+
+class IngestRequest(BaseModel):
+    client_id: str = Field(min_length=1, max_length=255)
+    result: dict[str, Any]
+    model_name: str
+    model_version: str
+
+
+class DeleteAccountRequest(BaseModel):
+    current_password: str | None = None
+    provider: str | None = None
+    provider_token: str | None = None

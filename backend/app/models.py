@@ -1,7 +1,7 @@
 import uuid
 from datetime import UTC, datetime
 
-from sqlalchemy import Boolean, DateTime, ForeignKey, Index, String, Text, UniqueConstraint, Uuid
+from sqlalchemy import JSON, Boolean, DateTime, ForeignKey, Index, String, Text, UniqueConstraint, Uuid
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from .db import Base
@@ -68,3 +68,28 @@ class EmailToken(Base):
     used_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
 
     user: Mapped[User] = relationship(back_populates="email_tokens")
+
+
+class Scan(Base):
+    __tablename__ = "scans"
+    __table_args__ = (
+        UniqueConstraint("user_id", "client_id", name="uq_scans_user_client"),
+        Index("ix_scans_user_created", "user_id", "created_at"),
+    )
+
+    id: Mapped[uuid.UUID] = mapped_column(Uuid, primary_key=True, default=uuid.uuid4)
+    user_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"), index=True)
+    client_id: Mapped[str | None] = mapped_column(String(255), nullable=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=lambda: datetime.now(UTC))
+    source: Mapped[str] = mapped_column(String(16), nullable=False)
+    model_name: Mapped[str] = mapped_column(String(64), nullable=False)
+    model_version: Mapped[str] = mapped_column(String(64), nullable=False)
+    top_class: Mapped[str] = mapped_column(String(255), nullable=False)
+    confidence: Mapped[float] = mapped_column(nullable=False)
+    top3: Mapped[list] = mapped_column(JSON, nullable=False)
+    unsure: Mapped[bool] = mapped_column(Boolean, nullable=False)
+    lesion_area_frac: Mapped[float | None] = mapped_column(nullable=True)
+    image_path: Mapped[str | None] = mapped_column(String(1000), nullable=True)
+    mask_path: Mapped[str | None] = mapped_column(String(1000), nullable=True)
+    latency_ms: Mapped[int | None] = mapped_column(nullable=True)
+    notes: Mapped[str | None] = mapped_column(Text, nullable=True)
