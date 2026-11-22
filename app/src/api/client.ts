@@ -76,6 +76,13 @@ export class ApiClient {
     };
 
     const response = await execute(true);
+    const contentType = response.headers.get('content-type') ?? '';
+    if (contentType.includes('text/html')) {
+      throw new ApiError(
+        response.status,
+        'API URL is not returning JSON. Verify EXPO_PUBLIC_API_URL points to the FastAPI server.',
+      );
+    }
     if (!response.ok) {
       let message = 'Request failed';
       try {

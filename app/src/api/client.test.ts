@@ -1,6 +1,29 @@
 import { ApiClient } from './client';
 
 describe('ApiClient refresh single-flight', () => {
+  it('reports an HTML API response as a configuration error', async () => {
+    global.fetch = jest.fn(
+      async () =>
+        new Response('<!doctype html><title>Expo</title>', {
+          status: 200,
+          headers: { 'Content-Type': 'text/html' },
+        }),
+    ) as typeof fetch;
+
+    const client = new ApiClient({
+      baseUrl: 'https://api.example.com',
+      getAccessToken: () => null,
+      setAccessToken: jest.fn(),
+      getRefreshToken: async () => null,
+      setRefreshToken: jest.fn(),
+      clearSession: jest.fn(),
+    });
+
+    await expect(client.request('/auth/login', { method: 'POST' }, false)).rejects.toThrow(
+      'EXPO_PUBLIC_API_URL',
+    );
+  });
+
   it('runs only one refresh for concurrent calls', async () => {
     let refreshToken = 'old-refresh-token-123456789';
     let accessToken: string | null = 'old-access';
