@@ -1,4 +1,3 @@
-import Constants from 'expo-constants';
 import * as Crypto from 'expo-crypto';
 import {
   GoogleOneTapSignIn,
@@ -12,7 +11,10 @@ import { SocialLoginCancelledError } from './types';
 
 export class GoogleProvider implements SocialProvider {
   async signIn(): Promise<SocialCredentials> {
-    const extra = Constants.expoConfig?.extra;
+    const extra = {
+      googleIosClientId: process.env.EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID,
+      googleAndroidClientId: process.env.EXPO_PUBLIC_GOOGLE_ANDROID_CLIENT_ID,
+    };
     const webClientId =
       Platform.OS === 'ios' ? extra?.googleIosClientId : extra?.googleAndroidClientId;
     if (!webClientId) throw new Error('Google sign-in is not configured');

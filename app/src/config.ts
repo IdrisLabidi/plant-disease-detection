@@ -1,4 +1,3 @@
-import Constants from 'expo-constants';
 import { z } from 'zod';
 
 const schema = z.object({
@@ -14,8 +13,15 @@ const schema = z.object({
 export type AppConfig = z.infer<typeof schema>;
 
 export function loadConfig(): AppConfig {
-  const extra = Constants.expoConfig?.extra ?? {};
-  const parsed = schema.safeParse(extra);
+  const parsed = schema.safeParse({
+    apiUrl: process.env.EXPO_PUBLIC_API_URL,
+    googleWebClientId: process.env.EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID,
+    googleAndroidClientId: process.env.EXPO_PUBLIC_GOOGLE_ANDROID_CLIENT_ID,
+    googleIosClientId: process.env.EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID,
+    facebookAppId: process.env.EXPO_PUBLIC_FACEBOOK_APP_ID,
+    appScheme: process.env.EXPO_PUBLIC_APP_SCHEME ?? 'plant-disease',
+    mock: process.env.EXPO_PUBLIC_MOCK === '1',
+  });
   if (!parsed.success) {
     throw new Error(`Invalid app configuration: ${parsed.error.message}`);
   }

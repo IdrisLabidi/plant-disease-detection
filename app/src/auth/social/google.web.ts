@@ -1,4 +1,3 @@
-import Constants from 'expo-constants';
 import * as AuthSession from 'expo-auth-session';
 import * as Crypto from 'expo-crypto';
 import * as WebBrowser from 'expo-web-browser';
@@ -8,7 +7,7 @@ import { SocialLoginCancelledError } from './types';
 
 export class GoogleProvider implements SocialProvider {
   async signIn(): Promise<SocialCredentials> {
-    const clientId = Constants.expoConfig?.extra?.googleWebClientId;
+    const clientId = process.env.EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID;
     if (!clientId) throw new Error('Google sign-in is not configured');
     const nonce = await Crypto.digestStringAsync(
       Crypto.CryptoDigestAlgorithm.SHA256,

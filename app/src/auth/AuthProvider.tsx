@@ -1,10 +1,10 @@
-import Constants from 'expo-constants';
 import type { PropsWithChildren } from 'react';
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import type { z } from 'zod';
 
 import { ApiClient } from '@/api/client';
 import { tokenResponseSchema, userSchema } from '@/api/schemas';
+import { loadConfig } from '@/config';
 import { clearRefreshToken, getRefreshToken, setRefreshToken } from './tokenStorage';
 import type { SocialProviderName } from './social/types';
 import { signInWithProvider } from './social/registry';
@@ -43,6 +43,7 @@ const accessSession = new AccessSession();
 export function AuthProvider({ children }: PropsWithChildren) {
   const [user, setUser] = useState<User | null>(null);
   const [restoring, setRestoring] = useState(true);
+  const config = loadConfig();
 
   const clearSession = useCallback(async () => {
     accessSession.set(null);
@@ -53,14 +54,14 @@ export function AuthProvider({ children }: PropsWithChildren) {
   const api = useMemo(
     () =>
       new ApiClient({
-        baseUrl: String(Constants.expoConfig?.extra?.apiUrl ?? ''),
+        baseUrl: config.apiUrl,
         getAccessToken: () => accessSession.value,
         setAccessToken: (token) => accessSession.set(token),
         getRefreshToken,
         setRefreshToken,
         clearSession,
       }),
-    [clearSession],
+    [clearSession, config.apiUrl],
   );
 
   useEffect(() => {

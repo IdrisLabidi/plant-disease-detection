@@ -1,4 +1,3 @@
-import Constants from 'expo-constants';
 import * as AuthSession from 'expo-auth-session';
 import * as WebBrowser from 'expo-web-browser';
 
@@ -7,7 +6,7 @@ import { SocialLoginCancelledError } from './types';
 
 export class FacebookProvider implements SocialProvider {
   async signIn(): Promise<SocialCredentials> {
-    const appId = Constants.expoConfig?.extra?.facebookAppId;
+    const appId = process.env.EXPO_PUBLIC_FACEBOOK_APP_ID;
     if (!appId) throw new Error('Facebook sign-in is not configured');
     const redirectUri = AuthSession.makeRedirectUri({ preferLocalhost: true });
     const state = crypto.randomUUID();
