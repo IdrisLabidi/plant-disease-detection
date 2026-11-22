@@ -20,6 +20,16 @@ async def lifespan(_: FastAPI):
 
 
 settings = get_settings()
+cors_origins = list(settings.cors_origins)
+if settings.env != "production":
+    for origin in (
+        "http://localhost:8081",
+        "http://127.0.0.1:8081",
+        "http://localhost:8080",
+        "http://127.0.0.1:8080",
+    ):
+        if origin not in cors_origins:
+            cors_origins.append(origin)
 app = FastAPI(
     title="Plant Disease Detection API",
     docs_url=None if settings.env == "production" else "/docs",
@@ -28,7 +38,7 @@ app = FastAPI(
 )
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=settings.cors_origins,
+    allow_origins=cors_origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
