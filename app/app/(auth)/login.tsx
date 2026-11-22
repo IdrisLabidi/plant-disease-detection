@@ -4,6 +4,7 @@ import { ActivityIndicator, Pressable, StyleSheet, Text, TextInput, View } from 
 
 import { ApiError } from '@/api/client';
 import { useAuth } from '@/auth/AuthProvider';
+import { SocialButtons } from '@/auth/SocialButtons';
 
 export default function LoginScreen() {
   const { login } = useAuth();
@@ -72,6 +73,7 @@ export default function LoginScreen() {
         <Link href="/(auth)/register" style={styles.link}>
           Create an account
         </Link>
+        <SocialButtons />
       </View>
     </View>
   );

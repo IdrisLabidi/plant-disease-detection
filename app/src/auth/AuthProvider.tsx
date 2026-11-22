@@ -6,6 +6,8 @@ import type { z } from 'zod';
 import { ApiClient } from '@/api/client';
 import { tokenResponseSchema, userSchema } from '@/api/schemas';
 import { clearRefreshToken, getRefreshToken, setRefreshToken } from './tokenStorage';
+import type { SocialProviderName } from './social/types';
+import { signInWithProvider } from './social/registry';
 
 type User = z.infer<typeof userSchema>;
 
@@ -16,6 +18,15 @@ type AuthContextValue = {
   register: (email: string, password: string, displayName?: string) => Promise<void>;
   logout: () => Promise<void>;
   logoutAll: () => Promise<void>;
+  socialLogin: (provider: SocialProviderName) => Promise<void>;
+  linkIdentity: (provider: SocialProviderName) => Promise<void>;
+  unlinkIdentity: (provider: SocialProviderName) => Promise<void>;
+  changePassword: (currentPassword: string | null, newPassword: string) => Promise<void>;
+  deleteAccount: (payload: {
+    currentPassword?: string;
+    provider?: 'google' | 'facebook';
+    providerToken?: string;
+  }) => Promise<void>;
   api: ApiClient;
 };
 
@@ -132,9 +143,126 @@ export function AuthProvider({ children }: PropsWithChildren) {
     }
   }, [api, clearSession]);
 
+  const socialLogin = useCallback(
+    async (providerName: SocialProviderName) => {
+      const credentials = await signInWithProvider(providerName);
+      const payload =
+        credentials.provider === 'google'
+          ? await api.request<unknown>(
+              '/auth/oauth/google',
+              {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                  id_token: credentials.idToken,
+                  nonce: credentials.nonce,
+                }),
+              },
+              false,
+            )
+          : await api.request<unknown>(
+              '/auth/oauth/facebook',
+              {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ access_token: credentials.accessToken }),
+              },
+              false,
+            );
+      await storeTokens(payload);
+    },
+    [api, storeTokens],
+  );
+
+  const linkIdentity = useCallback(
+    async (providerName: SocialProviderName) => {
+      const credentials = await signInWithProvider(providerName);
+      const body: Record<string, string> =
+        credentials.provider === 'google'
+          ? {
+              id_token: credentials.idToken,
+              nonce: credentials.nonce ?? '',
+            }
+          : { access_token: credentials.accessToken };
+      await api.request(`/auth/link/${providerName}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
+      });
+    },
+    [api],
+  );
+
+  const unlinkIdentity = useCallback(
+    async (providerName: SocialProviderName) => {
+      await api.request(`/auth/link/${providerName}`, { method: 'DELETE' });
+    },
+    [api],
+  );
+
+  const changePassword = useCallback(
+    async (currentPassword: string | null, newPassword: string) => {
+      await api.request('/auth/password/change', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          current_password: currentPassword,
+          new_password: newPassword,
+        }),
+      });
+    },
+    [api],
+  );
+
+  const deleteAccount = useCallback(
+    async (payload: {
+      currentPassword?: string;
+      provider?: 'google' | 'facebook';
+      providerToken?: string;
+    }) => {
+      await api.request('/me', {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          current_password: payload.currentPassword,
+          provider: payload.provider,
+          provider_token: payload.providerToken,
+        }),
+      });
+      await clearSession();
+    },
+    [api, clearSession],
+  );
+
   const value = useMemo(
-    () => ({ user, restoring, login, register, logout, logoutAll, api }),
-    [user, restoring, login, register, logout, logoutAll, api],
+    () => ({
+      user,
+      restoring,
+      login,
+      register,
+      logout,
+      logoutAll,
+      socialLogin,
+      linkIdentity,
+      unlinkIdentity,
+      changePassword,
+      deleteAccount,
+      api,
+    }),
+    [
+      user,
+      restoring,
+      login,
+      register,
+      logout,
+      logoutAll,
+      socialLogin,
+      linkIdentity,
+      unlinkIdentity,
+      changePassword,
+      deleteAccount,
+      api,
+    ],
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
