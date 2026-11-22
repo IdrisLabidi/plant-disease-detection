@@ -94,4 +94,21 @@ export class ApiClient {
     if (response.status === 204) return undefined as T;
     return response.json() as Promise<T>;
   }
+
+  async requestBinary(path: string): Promise<ArrayBuffer> {
+    const execute = async (retryUnauthorized: boolean): Promise<Response> => {
+      const headers = new Headers({ Accept: 'image/png,image/jpeg,*/*' });
+      const accessToken = this.options.getAccessToken();
+      if (accessToken) headers.set('Authorization', `Bearer ${accessToken}`);
+      const response = await fetch(`${this.options.baseUrl}${path}`, { headers });
+      if (response.status === 401 && retryUnauthorized) {
+        await this.refresh();
+        return execute(false);
+      }
+      return response;
+    };
+    const response = await execute(true);
+    if (!response.ok) throw new ApiError(response.status, 'Unable to load scan image');
+    return response.arrayBuffer();
+  }
 }
