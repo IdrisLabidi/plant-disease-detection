@@ -19,6 +19,10 @@ Never put a Facebook app secret or backend secret in `EXPO_PUBLIC_*` variables.
 Configure one web OAuth client and, for native builds, Android and iOS clients.
 
 - Add the Expo web redirect origin/redirect URI to the Google web client.
+  - For local web testing, add `http://127.0.0.1:8081` and `http://localhost:8081`
+    as authorized JavaScript origins.
+  - Add the exact OAuth callback URI `http://127.0.0.1:8081/oauth/callback` or
+    `http://localhost:8081/oauth/callback` as an authorized redirect URI.
 - Android: add the app package and signing certificate SHA-1/SHA-256 fingerprints.
 - iOS: add the bundle identifier and put the reversed iOS client ID in
   `EXPO_PUBLIC_GOOGLE_IOS_REVERSED_CLIENT_ID`.

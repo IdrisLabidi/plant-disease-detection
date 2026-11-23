@@ -13,23 +13,31 @@ export class GoogleProvider implements SocialProvider {
       Crypto.CryptoDigestAlgorithm.SHA256,
       `${Date.now()}-${Math.random()}`,
     );
-    const redirectUri = AuthSession.makeRedirectUri({ preferLocalhost: true });
+    const redirectUri =
+      typeof window === 'undefined'
+        ? AuthSession.makeRedirectUri({ path: 'oauth/callback' })
+        : new URL('/oauth/callback', window.location.origin).toString();
     const params = new URLSearchParams({
       client_id: String(clientId),
       redirect_uri: redirectUri,
       response_type: 'id_token',
+      response_mode: 'fragment',
       scope: 'openid email profile',
       nonce,
       state: nonce,
     });
-    WebBrowser.maybeCompleteAuthSession();
     const result = await WebBrowser.openAuthSessionAsync(
       `https://accounts.google.com/o/oauth2/v2/auth?${params.toString()}`,
       redirectUri,
     );
     if (result.type !== 'success') throw new SocialLoginCancelledError();
-    const fragment = new URL(result.url).hash.slice(1);
-    const values = new URLSearchParams(fragment);
+    const callback = new URL(result.url);
+    const values = new URLSearchParams(
+      callback.hash.startsWith('#') ? callback.hash.slice(1) : callback.search.slice(1),
+    );
+    if (values.get('state') !== nonce) {
+      throw new Error('Google OAuth state did not match');
+    }
     const idToken = values.get('id_token');
     if (!idToken) throw new Error('Google did not return an ID token');
     return { provider: 'google', idToken, nonce };
