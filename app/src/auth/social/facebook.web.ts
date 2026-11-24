@@ -1,5 +1,7 @@
 import * as AuthSession from 'expo-auth-session';
+import * as Crypto from 'expo-crypto';
 import * as WebBrowser from 'expo-web-browser';
+import { Platform } from 'react-native';
 
 import type { SocialCredentials, SocialProvider } from './types';
 import { SocialLoginCancelledError } from './types';
@@ -9,10 +11,10 @@ export class FacebookProvider implements SocialProvider {
     const appId = process.env.EXPO_PUBLIC_FACEBOOK_APP_ID;
     if (!appId) throw new Error('Facebook sign-in is not configured');
     const redirectUri =
-      typeof window === 'undefined'
-        ? AuthSession.makeRedirectUri({ path: 'oauth/callback' })
-        : new URL('/oauth/callback', window.location.origin).toString();
-    const state = crypto.randomUUID();
+      Platform.OS === 'web' && typeof window !== 'undefined'
+        ? new URL('/oauth/callback', window.location.origin).toString()
+        : AuthSession.makeRedirectUri({ path: 'oauth/callback' });
+    const state = Crypto.randomUUID();
     const params = new URLSearchParams({
       client_id: String(appId),
       redirect_uri: redirectUri,
@@ -37,3 +39,4 @@ export class FacebookProvider implements SocialProvider {
     return { provider: 'facebook', accessToken };
   }
 }
+

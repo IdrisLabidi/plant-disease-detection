@@ -7,22 +7,6 @@ export default ({ config }: ConfigContext): ExpoConfig => {
     'expo-secure-store',
     'expo-sqlite',
   ];
-  if (process.env.EXPO_PUBLIC_GOOGLE_IOS_REVERSED_CLIENT_ID) {
-    plugins.push([
-      'react-native-nitro-google-signin',
-      { iosUrlScheme: process.env.EXPO_PUBLIC_GOOGLE_IOS_REVERSED_CLIENT_ID },
-    ]);
-  }
-  if (process.env.EXPO_PUBLIC_FACEBOOK_APP_ID) {
-    plugins.push([
-      'react-native-fbsdk-next',
-      {
-        appID: process.env.EXPO_PUBLIC_FACEBOOK_APP_ID,
-        scheme: `fb${process.env.EXPO_PUBLIC_FACEBOOK_APP_ID}`,
-        displayName: 'Plant Disease',
-      },
-    ]);
-  }
 
   return {
     ...config,

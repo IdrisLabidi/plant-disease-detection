@@ -2,20 +2,6 @@ import { ApiClient } from '@/api/client';
 import { signInWithProvider } from './registry';
 import { SocialLoginCancelledError } from './types';
 
-jest.mock('react-native-fbsdk-next', () => ({
-  AccessToken: { getCurrentAccessToken: jest.fn() },
-  LoginManager: { logInWithPermissions: jest.fn() },
-}));
-
-jest.mock('react-native-nitro-google-signin', () => ({
-  GoogleOneTapSignIn: {
-    configure: jest.fn(),
-    presentExplicitSignIn: jest.fn(),
-  },
-  isCancelledResponse: jest.fn(() => false),
-  isSuccessResponse: jest.fn(() => true),
-}));
-
 describe('fake social providers', () => {
   it('handles Google success', async () => {
     const result = await signInWithProvider('google', {

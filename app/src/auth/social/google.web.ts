@@ -1,6 +1,7 @@
 import * as AuthSession from 'expo-auth-session';
 import * as Crypto from 'expo-crypto';
 import * as WebBrowser from 'expo-web-browser';
+import { Platform } from 'react-native';
 
 import type { SocialCredentials, SocialProvider } from './types';
 import { SocialLoginCancelledError } from './types';
@@ -14,9 +15,9 @@ export class GoogleProvider implements SocialProvider {
       `${Date.now()}-${Math.random()}`,
     );
     const redirectUri =
-      typeof window === 'undefined'
-        ? AuthSession.makeRedirectUri({ path: 'oauth/callback' })
-        : new URL('/oauth/callback', window.location.origin).toString();
+      Platform.OS === 'web' && typeof window !== 'undefined'
+        ? new URL('/oauth/callback', window.location.origin).toString()
+        : AuthSession.makeRedirectUri({ path: 'oauth/callback' });
     const params = new URLSearchParams({
       client_id: String(clientId),
       redirect_uri: redirectUri,
@@ -43,3 +44,4 @@ export class GoogleProvider implements SocialProvider {
     return { provider: 'google', idToken, nonce };
   }
 }
+

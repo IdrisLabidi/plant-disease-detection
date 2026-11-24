@@ -6,9 +6,7 @@ import * as WebBrowser from 'expo-web-browser';
 
 import { AuthProvider } from '@/auth/AuthProvider';
 
-if (typeof window !== 'undefined') {
-  WebBrowser.maybeCompleteAuthSession();
-}
+WebBrowser.maybeCompleteAuthSession();
 
 export default function RootLayout() {
   const [queryClient] = useState(() => new QueryClient());
