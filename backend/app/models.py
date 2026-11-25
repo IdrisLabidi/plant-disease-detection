@@ -89,7 +89,9 @@ class Scan(Base):
     top3: Mapped[list] = mapped_column(JSON, nullable=False)
     unsure: Mapped[bool] = mapped_column(Boolean, nullable=False)
     lesion_area_frac: Mapped[float | None] = mapped_column(nullable=True)
-    image_path: Mapped[str | None] = mapped_column(String(1000), nullable=True)
-    mask_path: Mapped[str | None] = mapped_column(String(1000), nullable=True)
+    image_path: Mapped[str | None] = mapped_column(String(1000), nullable=True) #local path
+    mask_path: Mapped[str | None] = mapped_column(String(1000), nullable=True)  # local path
+    image_url: Mapped[str | None] = mapped_column(String(1000), nullable=True) #cloudinary url 
+    mask_url: Mapped[str | None] = mapped_column(String(1000), nullable=True)  #cloudinary url
     latency_ms: Mapped[int | None] = mapped_column(nullable=True)
     notes: Mapped[str | None] = mapped_column(Text, nullable=True)

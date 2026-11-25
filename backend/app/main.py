@@ -6,7 +6,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from .config import get_settings
 from .ml.registry import ModelRegistry
 from .routers import auth, health, me, models, oauth, scans
-from .storage import LocalScanStorage
+from .storage import LocalScanStorage, CloudinaryScanStorage
 
 
 @asynccontextmanager
@@ -15,7 +15,11 @@ async def lifespan(_: FastAPI):
     registry = ModelRegistry(settings.models_dir)
     registry.load()
     _.state.model_registry = registry
-    _.state.storage = LocalScanStorage(settings.storage_dir)
+    _.state.storage = CloudinaryScanStorage(
+        settings.cloudinary_cloud_name,
+        settings.cloudinary_api_key,
+        settings.cloudinary_api_secret.get_secret_value() if settings.cloudinary_api_secret else "",
+    ) if settings.cloudinary_cloud_name and settings.cloudinary_api_key and settings.cloudinary_api_secret else LocalScanStorage(settings.storage_dir)
     yield
 
 

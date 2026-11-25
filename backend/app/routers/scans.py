@@ -43,7 +43,8 @@ def _scan_response(scan: Scan) -> dict:
         "top3": scan.top3,
         "unsure": scan.unsure,
         "lesion_area_frac": scan.lesion_area_frac,
-        "mask_url": f"/scans/{scan.id}/mask" if scan.mask_path else None,
+        "mask_url": f"/scans/{scan.id}/mask" if scan.mask_path else scan.mask_url,
+        "image_url": f"/scans/{scan.id}/image" if scan.image_path else scan.image_url,
         "latency_ms": scan.latency_ms,
         "notes": scan.notes,
     }
@@ -114,15 +115,18 @@ def create_scan(
         mask_image.save(output, format="PNG")
         mask_bytes = output.getvalue()
         mask_path = _storage(request).save(
-            f"{user.id}/{uuid.uuid4()}.png",
+            f"{user.id}/masks/{uuid.uuid4().hex}",
             mask_bytes,
         )
 
     latency_ms = round((time.perf_counter() - started) * 1000)
     image_path = _storage(request).save(
-        f"{user.id}/{uuid.uuid4()}.jpg",
+        f"{user.id}/scans/{uuid.uuid4().hex}",
         sanitized,
     )
+    storage_type = "cloudinary" if _storage(request).__class__.__name__ == "CloudinaryScanStorage" else "local"
+    image_url = _storage(request).url(image_path) if storage_type == "cloudinary" else None
+    mask_url = _storage(request).url(mask_path) if mask_path and storage_type == "cloudinary" else None
     scan = Scan(
         user_id=user.id,
         client_id=None,
@@ -134,8 +138,10 @@ def create_scan(
         top3=top3,
         unsure=unsure,
         lesion_area_frac=lesion_area_frac,
-        image_path=image_path,
-        mask_path=mask_path,
+        image_path=image_path if storage_type == "local" else None,
+        mask_path=mask_path if storage_type == "local" else None,
+        image_url=image_url,
+        mask_url=mask_url,
         latency_ms=latency_ms,
     )
     db.add(scan)

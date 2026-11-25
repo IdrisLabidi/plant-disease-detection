@@ -97,6 +97,7 @@ class ScanResponse(BaseModel):
     unsure: bool
     lesion_area_frac: float | None
     mask_url: str | None = None
+    image_url: str | None = None
     latency_ms: int | None
     notes: str | None
 

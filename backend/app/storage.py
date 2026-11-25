@@ -45,3 +45,45 @@ class LocalScanStorage:
 
     def url(self, path: str) -> str:
         return f"/scans/{Path(path).stem}/image"
+
+class CloudinaryScanStorage:
+    def __init__(self, cloud_name: str, api_key: str, api_secret: str):
+        import cloudinary
+        import cloudinary.uploader
+        import cloudinary.api
+
+        self.cloud_name = cloud_name
+        self.api_key = api_key
+        self.api_secret = api_secret
+
+        cloudinary.config(
+            cloud_name=self.cloud_name,
+            api_key=self.api_key,
+            api_secret=self.api_secret,
+            secure=True
+        )
+
+    def save(self, key: str, content: bytes) -> str:
+        from io import BytesIO
+        import cloudinary.uploader
+
+        safe_key = Path(key)
+        if safe_key.is_absolute() or ".." in safe_key.parts:
+            raise ValueError("Invalid storage key")
+
+        # Upload the file to Cloudinary
+        result = cloudinary.uploader.upload(BytesIO(content), public_id=str(safe_key), overwrite=True)
+        return result['public_id']
+
+    def read(self, path: str) -> bytes:
+        raise NotImplementedError("Reading files from Cloudinary is not supported.")
+
+    def delete(self, path: str | None) -> None:
+        if not path:
+            return
+        import cloudinary.uploader
+        cloudinary.uploader.destroy(path)
+
+    def url(self, path: str) -> str:
+        import cloudinary.utils
+        return cloudinary.utils.cloudinary_url(path)[0]

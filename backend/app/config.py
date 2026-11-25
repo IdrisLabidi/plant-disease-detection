@@ -39,6 +39,9 @@ class Settings(BaseSettings):
     facebook_graph_version: str = "v22.0"
     issuer: str = "plant-disease-api"
     audience: str = "plant-disease-app"
+    cloudinary_cloud_name: str = ""
+    cloudinary_api_key: str = ""
+    cloudinary_api_secret: SecretStr | None = None
 
     @field_validator("cors_origins", mode="before")
     @classmethod

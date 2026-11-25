@@ -15,6 +15,7 @@ dependencies = [
     "asarpy==1.0.1",
     "attrs==26.1.0",
     "click==8.5.0",
+    "cloudinary>=1.47.0",
     "contourpy==1.4.0",
     "cuda-bindings==13.5.0",
     "cuda-pathfinder==1.9.0",
