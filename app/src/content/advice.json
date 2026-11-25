@@ -1,0 +1,110 @@
+{
+  "apple__apple_scab": {
+    "status": "placeholder",
+    "summary": "Reviewed agronomic advice has not been provided for this result.",
+    "prevention": ["TODO: team-reviewed prevention guidance"],
+    "sources": []
+  },
+  "apple__black_rot": {
+    "status": "placeholder",
+    "summary": "Reviewed agronomic advice has not been provided for this result.",
+    "prevention": ["TODO: team-reviewed prevention guidance"],
+    "sources": []
+  },
+  "apple__cedar_apple_rust": {
+    "status": "placeholder",
+    "summary": "Reviewed agronomic advice has not been provided for this result.",
+    "prevention": ["TODO: team-reviewed prevention guidance"],
+    "sources": []
+  },
+  "apple__healthy": {
+    "status": "placeholder",
+    "summary": "Reviewed agronomic advice has not been provided for this result.",
+    "prevention": ["TODO: team-reviewed prevention guidance"],
+    "sources": []
+  },
+  "corn__gray_leaf_spot": {
+    "status": "placeholder",
+    "summary": "Reviewed agronomic advice has not been provided for this result.",
+    "prevention": ["TODO: team-reviewed prevention guidance"],
+    "sources": []
+  },
+  "corn__common_rust": {
+    "status": "placeholder",
+    "summary": "Reviewed agronomic advice has not been provided for this result.",
+    "prevention": ["TODO: team-reviewed prevention guidance"],
+    "sources": []
+  },
+  "corn__northern_leaf_blight": {
+    "status": "placeholder",
+    "summary": "Reviewed agronomic advice has not been provided for this result.",
+    "prevention": ["TODO: team-reviewed prevention guidance"],
+    "sources": []
+  },
+  "corn__healthy": {
+    "status": "placeholder",
+    "summary": "Reviewed agronomic advice has not been provided for this result.",
+    "prevention": ["TODO: team-reviewed prevention guidance"],
+    "sources": []
+  },
+  "tomato__bacterial_spot": {
+    "status": "placeholder",
+    "summary": "Reviewed agronomic advice has not been provided for this result.",
+    "prevention": ["TODO: team-reviewed prevention guidance"],
+    "sources": []
+  },
+  "tomato__early_blight": {
+    "status": "placeholder",
+    "summary": "Reviewed agronomic advice has not been provided for this result.",
+    "prevention": ["TODO: team-reviewed prevention guidance"],
+    "sources": []
+  },
+  "tomato__late_blight": {
+    "status": "placeholder",
+    "summary": "Reviewed agronomic advice has not been provided for this result.",
+    "prevention": ["TODO: team-reviewed prevention guidance"],
+    "sources": []
+  },
+  "tomato__leaf_mold": {
+    "status": "placeholder",
+    "summary": "Reviewed agronomic advice has not been provided for this result.",
+    "prevention": ["TODO: team-reviewed prevention guidance"],
+    "sources": []
+  },
+  "tomato__septoria_leaf_spot": {
+    "status": "placeholder",
+    "summary": "Reviewed agronomic advice has not been provided for this result.",
+    "prevention": ["TODO: team-reviewed prevention guidance"],
+    "sources": []
+  },
+  "tomato__spider_mites": {
+    "status": "placeholder",
+    "summary": "Reviewed agronomic advice has not been provided for this result.",
+    "prevention": ["TODO: team-reviewed prevention guidance"],
+    "sources": []
+  },
+  "tomato__target_spot": {
+    "status": "placeholder",
+    "summary": "Reviewed agronomic advice has not been provided for this result.",
+    "prevention": ["TODO: team-reviewed prevention guidance"],
+    "sources": []
+  },
+  "tomato__yellow_leaf_curl_virus": {
+    "status": "placeholder",
+    "summary": "Reviewed agronomic advice has not been provided for this result.",
+    "prevention": ["TODO: team-reviewed prevention guidance"],
+    "sources": []
+  },
+  "tomato__mosaic_virus": {
+    "status": "placeholder",
+    "summary": "Reviewed agronomic advice has not been provided for this result.",
+    "prevention": ["TODO: team-reviewed prevention guidance"],
+    "sources": []
+  },
+  "tomato__healthy": {
+    "status": "placeholder",
+    "summary": "Reviewed agronomic advice has not been provided for this result.",
+    "prevention": ["TODO: team-reviewed prevention guidance"],
+    "sources": []
+  }
+}
