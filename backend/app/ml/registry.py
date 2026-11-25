@@ -24,7 +24,15 @@ class ModelCard:
 
 class ModelRegistry:
     def __init__(self, models_dir: str):
-        self.models_dir = Path(models_dir).resolve()
+        path = Path(models_dir)
+        if not path.is_absolute() and not path.exists():
+            backend_relative = (Path(__file__).resolve().parents[2] / path).resolve()
+            project_relative = (Path(__file__).resolve().parents[3] / path).resolve()
+            if backend_relative.exists():
+                path = backend_relative
+            elif project_relative.exists():
+                path = project_relative
+        self.models_dir = path.resolve()
         self.cards: dict[str, dict] = {}
         self.classifiers: dict[str, torch.jit.ScriptModule] = {}
         self.segmenters: dict[str, torch.jit.ScriptModule] = {}
@@ -68,9 +76,14 @@ class ModelRegistry:
             self.models_dir / f"{public_name}.pt",
         ]
         if segmenter:
-            candidates.insert(0, self.models_dir / f"{card_name}.pt")
-        else:
-            candidates.insert(0, self.models_dir / f"{card_name}.pt")
+            if public_name == "mobilenet":
+                candidates.append(
+                    self.models_dir / "deeplabv3-mobilenet" / "plantseg_lesion_segmentation.ts"
+                )
+        elif public_name == "resnet50":
+            candidates.append(
+                self.models_dir / "resnet50-classifier" / "plantvillage_classifier.ts"
+            )
         path = next((item for item in candidates if item.exists()), None)
         if not path:
             return None

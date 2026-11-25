@@ -22,10 +22,10 @@ def test_ingest_is_idempotent_and_cross_user_scan_is_404():
             "model_version": "test",
             "result": {
                 "top3": [
-                    {"class_name": "unknown", "probability": 0.8},
-                    {"class_name": "unknown", "probability": 0.1},
+                    {"class_name": "Tomato___healthy", "probability": 0.8},
+                    {"class_name": "Tomato___Early_blight", "probability": 0.1},
                 ],
-                "top_class": "unknown",
+                "top_class": "Tomato___healthy",
                 "unsure": False,
             },
         }
@@ -51,8 +51,8 @@ def test_ingest_rejects_invalid_probability():
             "model_name": "resnet50",
             "model_version": "test",
             "result": {
-                "top3": [{"class_name": "unknown", "probability": 1.2}],
-                "top_class": "unknown",
+                "top3": [{"class_name": "Tomato___healthy", "probability": 1.2}],
+                "top_class": "Tomato___healthy",
             },
         }
         response = client.post("/scans/ingest", json=payload, headers=headers)
@@ -83,8 +83,8 @@ def test_scan_pagination_and_delete():
                 "model_name": "resnet50",
                 "model_version": "test",
                 "result": {
-                    "top3": [{"class_name": "unknown", "probability": 0.9}],
-                    "top_class": "unknown",
+                    "top3": [{"class_name": "Tomato___healthy", "probability": 0.9}],
+                    "top_class": "Tomato___healthy",
                 },
             }
             response = client.post("/scans/ingest", json=payload, headers=headers)
@@ -105,3 +105,28 @@ def test_scan_pagination_and_delete():
         deleted = client.delete(f"/scans/{ids[0]}", headers=headers)
         assert deleted.status_code == 204
         assert client.get(f"/scans/{ids[0]}", headers=headers).status_code == 404
+
+
+def test_create_scan_classifies_and_segments():
+    import io
+    from PIL import Image
+
+    image = Image.new("RGB", (256, 256), "green")
+    buffer = io.BytesIO()
+    image.save(buffer, "JPEG")
+
+    with TestClient(app) as client:
+        auth = register(client, "create-scan@example.com")
+        headers = {"Authorization": f"Bearer {auth['access_token']}"}
+        response = client.post(
+            "/scans",
+            data={"model": "resnet50", "segment": "true"},
+            files={"file": ("leaf.jpg", buffer.getvalue(), "image/jpeg")},
+            headers=headers,
+        )
+        assert response.status_code == 200
+        body = response.json()
+        assert body["model_name"] == "resnet50"
+        assert len(body["top3"]) == 3
+        assert body["lesion_area_frac"] is not None
+        assert body["mask_url"] is not None

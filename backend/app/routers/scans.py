@@ -13,6 +13,7 @@ from ..config import get_settings
 from ..db import get_db
 from ..deps import current_user
 from ..ml.pipeline import classify
+from ..ml.pipeline import segment as run_segment
 from ..ml.preprocess import normalize_image, sanitize_image
 from ..models import Scan, User
 from ..schemas import ScanResponse
@@ -93,10 +94,19 @@ def create_scan(
     lesion_area_frac = None
     mask_path = None
     if segment:
-        if model not in registry.segmenters:
+        segmenter_key = (
+            model if model in registry.segmenters else next(iter(registry.segmenters), None)
+        )
+        if not segmenter_key:
             raise HTTPException(status_code=503, detail="Segmenter is unavailable")
+        seg_card = registry.get_card(segmenter_key, True)
+        if not seg_card:
+            raise HTTPException(status_code=503, detail="Segmenter card is unavailable")
+        seg_tensor = normalize_image(sanitized, seg_card.input_size, seg_card.mean, seg_card.std)
         with registry.semaphore:
-            lesion_area_frac, mask_image = segment(registry.segmenters[model], registry.get_card(model, True), tensor)
+            lesion_area_frac, mask_image = run_segment(
+                registry.segmenters[segmenter_key], seg_card, seg_tensor
+            )
         mask_bytes = b""
         import io
 
