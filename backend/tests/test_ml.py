@@ -52,3 +52,59 @@ def test_dummy_torchscript_registry_and_preprocess(tmp_path):
         top3, unsure = classify(registry.classifiers["resnet50"], card, tensor)
     assert len(top3) == 3
     assert not unsure
+
+
+class DummySegmenter(torch.nn.Module):
+    def forward(self, value):
+        batch, _, height, width = value.shape
+        return torch.ones((batch, 2, height, width))
+
+
+def test_versioned_classifiers_and_segmenters_layout(tmp_path):
+    cls_dir = tmp_path / "classifiers" / "resnet50" / "v2"
+    cls_dir.mkdir(parents=True)
+    torch.jit.trace(DummyClassifier(), torch.zeros((1, 3, 224, 224))).save(str(cls_dir / "model.ts"))
+    (cls_dir / "model_config.json").write_text(json.dumps({"classes": ["healthy", "rust", "blight"]}))
+
+    # Older version should be ignored when card pins v2
+    old_cls_dir = tmp_path / "classifiers" / "resnet50" / "v1"
+    old_cls_dir.mkdir(parents=True)
+    torch.jit.trace(DummyClassifier(), torch.zeros((1, 3, 224, 224))).save(str(old_cls_dir / "model.ts"))
+
+    seg_dir = tmp_path / "segmenters" / "resnet50" / "2026-11-20"
+    seg_dir.mkdir(parents=True)
+    torch.jit.trace(DummySegmenter(), torch.zeros((1, 3, 512, 512))).save(str(seg_dir / "model.ts"))
+    (seg_dir / "model_config.json").write_text(json.dumps({"input_size": [512, 512]}))
+
+    (tmp_path / "model_cards.yaml").write_text(
+        yaml.safe_dump(
+            {
+                "classifier_resnet50": {
+                    "version": "v2",
+                    "input": {
+                        "size": [224, 224],
+                        "mean": [0.485, 0.456, 0.406],
+                        "std": [0.229, 0.224, 0.225],
+                    },
+                    "output": {"softmax_inside_model": False},
+                },
+                "segmenter_resnet50": {
+                    "version": "2026-11-20",
+                    "input": {
+                        "size": [256, 256],
+                        "mean": [0.485, 0.456, 0.406],
+                        "std": [0.229, 0.224, 0.225],
+                    },
+                    "output": {"softmax_inside_model": False},
+                },
+            }
+        )
+    )
+
+    registry = ModelRegistry(str(tmp_path))
+    registry.load()
+    cls_card = registry.get_card("resnet50")
+    seg_card = registry.get_card("resnet50", segmenter=True)
+    assert cls_card is not None and cls_card.version == "v2"
+    assert seg_card is not None and seg_card.version == "2026-11-20"
+    assert seg_card.input_size == (512, 512)

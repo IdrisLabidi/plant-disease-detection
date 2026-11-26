@@ -1,8 +1,9 @@
 data/
 inference_output/
-models/
+models/*
 classifier_output/
 !models/model_cards.yaml
+!models/README.md
 *.zip
 kaggle.json
 .env

@@ -130,3 +130,15 @@ def test_create_scan_classifies_and_segments():
         assert len(body["top3"]) == 3
         assert body["lesion_area_frac"] is not None
         assert body["mask_url"] is not None
+
+
+def test_list_models_includes_classifiers_and_segmenters():
+    with TestClient(app) as client:
+        response = client.get("/models")
+        assert response.status_code == 200
+        models = response.json()["models"]
+        assert {(m["name"], m["task"]) for m in models} >= {
+            ("resnet50", "classifier"),
+            ("resnet50", "segmenter"),
+            ("mobilenet", "segmenter"),
+        }

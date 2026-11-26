@@ -63,6 +63,47 @@ class ModelRegistry:
                 if model:
                     self.segmenters[public_name] = model
 
+    def _resolve_model_path(
+        self,
+        public_name: str,
+        card_name: str,
+        card: dict,
+        *,
+        segmenter: bool = False,
+    ) -> tuple[Path | None, str | None]:
+        """Locate the versioned model artifact under classifiers/ or segmenters/, with flat fallback."""
+        task_dir = "segmenters" if segmenter else "classifiers"
+        model_root = self.models_dir / task_dir / public_name
+        if model_root.is_dir():
+            card_version = card.get("version")
+            version_dir: Path | None = None
+            if card_version is not None:
+                candidate_dir = model_root / str(card_version)
+                if candidate_dir.is_dir():
+                    version_dir = candidate_dir
+            if version_dir is None:
+                version_dirs = sorted(d for d in model_root.iterdir() if d.is_dir())
+                if version_dirs:
+                    version_dir = version_dirs[-1]
+            if version_dir is not None:
+                for filename in ("model.ts", "model.pt", f"{public_name}.ts", f"{public_name}.pt"):
+                    candidate = version_dir / filename
+                    if candidate.is_file():
+                        return candidate, version_dir.name
+                for pattern in ("*.ts", "*.pt"):
+                    matches = sorted(version_dir.glob(pattern))
+                    if matches:
+                        return matches[0], version_dir.name
+
+        flat_candidates = [
+            self.models_dir / f"{card_name}.pt",
+            self.models_dir / f"{public_name}.pt",
+            self.models_dir / f"{card_name}.ts",
+            self.models_dir / f"{public_name}.ts",
+        ]
+        flat_path = next((item for item in flat_candidates if item.is_file()), None)
+        return flat_path, None
+
     def _load_public_model(
         self,
         public_name: str,
@@ -71,20 +112,9 @@ class ModelRegistry:
         *,
         segmenter: bool = False,
     ):
-        candidates = [
-            self.models_dir / f"{card_name}.pt",
-            self.models_dir / f"{public_name}.pt",
-        ]
-        if segmenter:
-            if public_name == "mobilenet":
-                candidates.append(
-                    self.models_dir / "deeplabv3-mobilenet" / "plantseg_lesion_segmentation.ts"
-                )
-        elif public_name == "resnet50":
-            candidates.append(
-                self.models_dir / "resnet50-classifier" / "plantvillage_classifier.ts"
-            )
-        path = next((item for item in candidates if item.exists()), None)
+        path, resolved_version = self._resolve_model_path(
+            public_name, card_name, card, segmenter=segmenter
+        )
         if not path:
             return None
 
@@ -92,20 +122,28 @@ class ModelRegistry:
         model.eval()
         input_spec = card["input"]
         size = tuple(input_spec["size"])
+        mean = list(input_spec["mean"])
+        std = list(input_spec["std"])
         config_file = path.with_name("model_config.json")
         classes: list[str] = []
         if config_file.exists():
             config = json.loads(config_file.read_text())
             classes = config.get("classes") or config.get("class_names") or []
+            if isinstance(config.get("input_size"), list) and len(config["input_size"]) == 2:
+                size = tuple(config["input_size"])
+            if isinstance(config.get("normalization_mean"), list):
+                mean = list(config["normalization_mean"])
+            if isinstance(config.get("normalization_std"), list):
+                std = list(config["normalization_std"])
         output = card.get("output", {})
         unsure = card.get("unsure_threshold", {}).get("value")
         mask_threshold = card.get("lesion_threshold", {}).get("value", 0.5)
         metadata = ModelCard(
             name=card_name,
-            version=str(card.get("version", "unknown")),
+            version=resolved_version or str(card.get("version", "unknown")),
             input_size=(int(size[0]), int(size[1])) if len(size) == 2 else (224, 224),
-            mean=list(input_spec["mean"]),
-            std=list(input_spec["std"]),
+            mean=mean,
+            std=std,
             classes=classes,
             softmax_inside_model=bool(output.get("softmax_inside_model", False)),
             unsure_threshold=float(unsure) if unsure is not None else None,
@@ -120,9 +158,6 @@ class ModelRegistry:
         return model
 
     def get_card(self, public_name: str, segmenter: bool = False) -> ModelCard | None:
-        card_name = "mobilenet" if public_name == "mobilenet" else "resnet50"
-        classifier_key = f"classifier_{card_name}:classifier"
-        segmenter_key = f"segmenter_{card_name}:segmenter"
         if public_name == "mobilenet":
             classifier_key = "classifier_mobilenet_v3:classifier"
             segmenter_key = "segmenter_mobilenet_v3:segmenter"
