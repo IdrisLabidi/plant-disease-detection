@@ -5,28 +5,7 @@ import { z } from 'zod';
 
 import { useAuth } from '@/auth/AuthProvider';
 import type { ScanResult } from '@/inference/types';
-
-const historyItemSchema = z.object({
-  id: z.string(),
-  client_id: z.string().nullable(),
-  created_at: z.string(),
-  source: z.enum(['server', 'device']),
-  model_name: z.enum(['resnet50', 'mobilenet']),
-  model_version: z.string(),
-  top_class: z.string(),
-  confidence: z.number(),
-  top3: z.array(
-    z.object({
-      class_name: z.string(),
-      probability: z.number(),
-    }),
-  ),
-  unsure: z.boolean(),
-  lesion_area_frac: z.number().nullable(),
-  mask_url: z.string().nullable().optional(),
-  latency_ms: z.number().nullable(),
-  notes: z.string().nullable(),
-});
+import { historyItemSchema } from '@/inference/schemas';
 
 const historySchema = z.object({
   items: z.array(historyItemSchema),
@@ -94,7 +73,7 @@ export default function HistoryScreen() {
     };
     router.push({
       pathname: '/scan/[id]',
-      params: { id: item.id, result: JSON.stringify(result) },
+      params: { id: item.id },
     });
   };
 

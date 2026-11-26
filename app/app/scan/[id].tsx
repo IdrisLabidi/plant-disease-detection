@@ -1,22 +1,39 @@
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import { useMemo, useState } from 'react';
+import { useCallback, useState, useEffect } from 'react';
 import { Image, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { z } from 'zod';
 
 import { getAdvice } from '@/content/advice';
-import type { ScanResult } from '@/inference/types';
+import { useAuth } from '@/auth/AuthProvider';
+import { historyItemSchema } from '@/inference/schemas';
 
 export default function ScanResultScreen() {
   const router = useRouter();
-  const params = useLocalSearchParams<{ id: string; imageUri?: string; result?: string }>();
+  const { api } = useAuth();
+  const params = useLocalSearchParams<{ id: string }>();
   const [showMask, setShowMask] = useState(true);
-  const result = useMemo<ScanResult | null>(() => {
-    if (!params.result) return null;
-    try {
-      return JSON.parse(params.result) as ScanResult;
-    } catch {
-      return null;
+  const [result, setResult] = useState<z.infer<typeof historyItemSchema> | null>(null);
+  
+  const load = useCallback(
+    async (id: string) => {
+      const response = await api.request(`/scans/${id}`);
+      return response;
+    },
+    [api],
+  ); 
+
+  useEffect(() => {
+    if (params.id) {
+      void load(params.id).then((response) => {
+        const result = historyItemSchema.parse(response);
+        setResult(result);
+      }).catch((error) => {
+        console.error('Failed to load scan result:', error);
+        setResult(null);
+      });
     }
-  }, [params.result]);
+  }, [params.id, load]);
+
 
   if (!result) {
     return (
@@ -31,24 +48,24 @@ export default function ScanResultScreen() {
     );
   }
 
-  const advice = getAdvice(result.top3[0]?.className ?? '');
+  const advice = getAdvice(result.top3[0]?.class_name ?? '');
   return (
     <ScrollView contentContainerStyle={styles.page}>
       <View style={styles.card}>
         <Text accessibilityRole="header" style={styles.title}>
           Scan result
         </Text>
-        {params.imageUri ? (
+        {result.image_url ? (
           <View style={styles.imageWrap}>
             <Image
               accessibilityLabel="Analyzed plant image"
-              source={{ uri: params.imageUri }}
+              source={{ uri: result.image_url }}
               style={styles.image}
             />
-            {result.maskUri && showMask ? (
+            {result.mask_url && showMask ? (
               <Image
                 accessibilityLabel="Lesion mask overlay"
-                source={{ uri: result.maskUri }}
+                source={{ uri: result.mask_url }}
                 style={styles.maskOverlay}
               />
             ) : null}
@@ -61,10 +78,10 @@ export default function ScanResultScreen() {
           </View>
         ) : null}
         {result.top3.map((item, index) => (
-          <View key={item.className} style={styles.prediction}>
+          <View key={item.class_name} style={styles.prediction}>
             <View style={styles.predictionLabel}>
               <Text style={styles.predictionName}>
-                {index + 1}. {item.className}
+                {index + 1}. {item.class_name}
               </Text>
               <Text>{Math.round(item.probability * 100)}%</Text>
             </View>
@@ -73,10 +90,10 @@ export default function ScanResultScreen() {
             </View>
           </View>
         ))}
-        {result.lesionAreaFrac !== null ? (
-          <Text>Estimated lesion area: {Math.round(result.lesionAreaFrac * 100)}%</Text>
+        {result.lesion_area_frac !== null ? (
+          <Text>Estimated lesion area: {Math.round(result.lesion_area_frac * 100)}%</Text>
         ) : null}
-        {result.maskUri ? (
+        {result.mask_url ? (
           <Pressable
             accessibilityRole="button"
             onPress={() => setShowMask((value) => !value)}
@@ -99,7 +116,7 @@ export default function ScanResultScreen() {
           ))}
         </View>
         <Text style={styles.meta}>
-          Engine: {result.source} • Model: {result.modelName} • Version: {result.modelVersion}
+          Engine: {result.source} • Model: {result.model_name} • Version: {result.model_version} • Latency: {result.latency_ms ?? 0} ms
         </Text>
         <Text style={styles.disclaimer}>
           This app does not replace an agronomist or professional diagnosis.
