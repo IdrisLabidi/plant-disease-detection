@@ -74,7 +74,7 @@ def create_scan(
     if file.content_type not in {"image/jpeg", "image/png", "image/webp"}:
         raise HTTPException(status_code=415, detail="Unsupported image type")
     try:
-        sanitized, _ = sanitize_image(content)
+        sanitized, sanitized_size = sanitize_image(content)
     except Exception:
         raise HTTPException(status_code=400, detail="Invalid image") from None
 
@@ -108,7 +108,8 @@ def create_scan(
             lesion_area_frac, mask_image = run_segment(
                 registry.segmenters[segmenter_key], seg_card, seg_tensor
             )
-        mask_bytes = b""
+        if mask_image.size != sanitized_size:
+            mask_image = mask_image.resize(sanitized_size, mask_image.Resampling.NEAREST if hasattr(mask_image, "Resampling") else 0)
         import io
 
         output = io.BytesIO()

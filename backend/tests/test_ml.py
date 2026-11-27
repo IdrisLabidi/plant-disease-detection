@@ -5,7 +5,7 @@ import torch
 import yaml
 from PIL import Image
 
-from app.ml.pipeline import classify
+from app.ml.pipeline import classify, segment
 from app.ml.preprocess import normalize_image, sanitize_image
 from app.ml.registry import ModelRegistry
 
@@ -108,3 +108,38 @@ def test_versioned_classifiers_and_segmenters_layout(tmp_path):
     assert cls_card is not None and cls_card.version == "v2"
     assert seg_card is not None and seg_card.version == "2026-11-20"
     assert seg_card.input_size == (512, 512)
+
+
+def test_segment_outputs_transparent_rgba_mask():
+    class HalfMaskSegmenter(torch.nn.Module):
+        def forward(self, value):
+            batch, _, height, width = value.shape
+            logits = torch.zeros((batch, 2, height, width))
+            # Left half background (channel 0 > channel 1), right half lesion (channel 1 > channel 0)
+            logits[:, 0, :, : width // 2] = 5.0
+            logits[:, 1, :, width // 2 :] = 5.0
+            return logits
+
+    from app.ml.registry import ModelCard
+
+    card = ModelCard(
+        name="segmenter_test",
+        version="test",
+        input_size=(64, 64),
+        mean=[0.485, 0.456, 0.406],
+        std=[0.229, 0.224, 0.225],
+        classes=[],
+        softmax_inside_model=False,
+        unsure_threshold=None,
+        mask_threshold=0.5,
+        file_hash="abc",
+    )
+    tensor = torch.zeros((1, 3, 64, 64))
+    lesion_frac, mask_img = segment(HalfMaskSegmenter(), card, tensor)
+    assert abs(lesion_frac - 0.5) < 1e-5
+    assert mask_img.mode == "RGBA"
+    assert mask_img.size == (64, 64)
+    # Background pixel (left) must be fully transparent
+    assert mask_img.getpixel((0, 0))[3] == 0
+    # Lesion pixel (right) must be opaque red
+    assert mask_img.getpixel((63, 63)) == (239, 68, 68, 255)

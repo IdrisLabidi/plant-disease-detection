@@ -161,7 +161,6 @@ const styles = StyleSheet.create({
     height: '100%',
     resizeMode: 'cover',
     opacity: 0.45,
-    tintColor: '#ef4444',
   },
   unsure: { backgroundColor: '#fef3c7', borderRadius: 8, padding: 12, gap: 4 },
   unsureTitle: { fontWeight: '700', color: '#92400e' },

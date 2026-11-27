@@ -1,4 +1,4 @@
-export type InferenceSource = 'server' | 'device' | 'mock';
+export type InferenceSource = 'server' | 'device';
 export type ModelName = 'resnet50' | 'mobilenet';
 
 export type TopPrediction = {

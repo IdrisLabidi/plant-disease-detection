@@ -1,3 +1,4 @@
+import numpy as np
 import torch
 from PIL import Image
 
@@ -39,9 +40,13 @@ def segment(model, card, tensor):
         else:
             probabilities = torch.sigmoid(output)
         mask = probabilities.squeeze().cpu()
-    lesion = float((mask >= card.mask_threshold).float().mean().item())
-    mask_bytes = Image.fromarray((mask.numpy() * 255).astype("uint8")).resize(
+    lesion_mask = mask >= card.mask_threshold
+    lesion = float(lesion_mask.float().mean().item())
+    lesion_np = lesion_mask.numpy()
+    rgba = np.zeros((lesion_np.shape[0], lesion_np.shape[1], 4), dtype=np.uint8)
+    rgba[lesion_np] = (239, 68, 68, 255)
+    mask_image = Image.fromarray(rgba, mode="RGBA").resize(
         (tensor.shape[-1], tensor.shape[-2]),
         Image.Resampling.NEAREST,
     )
-    return lesion, mask_bytes
+    return lesion, mask_image
