@@ -41,7 +41,7 @@ export default function ScanScreen() {
     try {
       const preparedUri = await prepareImage(uri, width, height);
       const inferencer = getConfiguredInferencer(api, mode);
-      const result = await inferencer.predict(preparedUri, { model, segment });
+      const result = await (await inferencer).predict(preparedUri, { model, segment });
       router.push({
         pathname: '/scan/[id]',
         params: {
